@@ -1,12 +1,17 @@
-import {React , useCallback, useEffect} from 'react'
+import {React , useCallback, useEffect, useState} from 'react'
 import { useForm } from 'react-hook-form' 
 import { Button, Input, Select, RTE } from '../index'
 import service from '../../appwrite/postService'
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 
+
+
 function PostForm({post}) {
-  const {register, handleSubmit, watch, setValue, control, getValues } = useForm({  //watching capabilities: agar kisi bhi field ko continously watch karna hia ya monitor karna hia
+  
+const [previewImage, setPreviewImage] = useState(null)
+const [formError, setFormError] = useState(null)
+  const {register, handleSubmit, watch, setValue, control, getValues, formState: { errors } } = useForm({  //watching capabilities: agar kisi bhi field ko continously watch karna hia ya monitor karna hia
     // ye form tab use hoga jab koi new post bana rha hai ya fir koi existing post edit kar raha hai
     //new post banana hoga tab hum Postform me post parameter empty rakhenge and edit karna hoga tab pass kardenge
     //toh uss hisaab se default values set hongi 
@@ -33,12 +38,17 @@ const submit = async (data) => {
         service.deleteFile(post.featuredImage)
       }
       // updated information of the post needs to be stored 
+      try{
       const dbPost = await service.updatePost(post.$id, {...data,
         featuredImage: file? file.$id : undefined
       })
       
       if(dbPost){
         navigate(`/post/${dbPost.$id}`)
+      }}
+      catch (err) {
+        console.error("Error updating post:", err);
+        // Optionally show a toast or error message to user
       }
 
   }
@@ -48,13 +58,14 @@ const submit = async (data) => {
     if(file){
       const fileId = file.$id
       data.featuredImage = fileId
-      const dbPost = await service.createPost({
-        ...data, userId : userData.$id,
-        //store se liya tha user ka data, toh post ke liye wahi use kardiya 
-      })
-      if(dbPost){
-        navigate(`/post/${dbPost.$id}`)
+      try {
+        const dbPost = await service.createPost({...data, userId: userData.$id});
+        if (dbPost) navigate(`/post/${dbPost.$id}`);
+      } catch (err) {
+        console.error("Error creating post:", err);
+        // Optionally show a toast or error message to user
       }
+      
 
     }
 
@@ -71,7 +82,9 @@ const slugTransform = useCallback((value) => {
           .trim()
           .toLowerCase()
           .replace(/[^a-zA-Z\d\s]+/g, "-")
-          .replace(/\s/g, "-");
+          .replace(/\s/g, "-")
+          .replace(/^-+|-+$/g, ""); // removes leading/trailing dashes
+          
 
   return "";
 }, []);
@@ -95,6 +108,7 @@ return (
               className="mb-4"
               {...register("title", { required: true })}
           />
+          {errors.title && <p className="text-red-500 text-sm">Title is required</p>}
           <Input
               label="Slug :"
               placeholder="Slug"
@@ -104,16 +118,47 @@ return (
                   setValue("slug", slugTransform(e.currentTarget.value), { shouldValidate: true });
               }}
           />
+          {errors.slug && <p className="text-red-500 text-sm">Slug is required</p>}
           <RTE label="Content :" name="content" control={control} defaultValue={getValues("content")} />
       </div>
       <div className="w-1/3 px-2">
-          <Input
-              label="Featured Image :"
-              type="file"
-              className="mb-4"
-              accept="image/png, image/jpg, image/jpeg, image/gif"
-              {...register("image", { required: !post })}
-          />
+      <Input
+          label="Featured Image :"
+          type="file"
+          className="mb-4"
+          accept="image/png, image/jpg, image/jpeg, image/gif"
+          {...register("image", {
+            required: !post,
+            onChange: (e) => {
+              const file = e.target.files[0]
+              if (file) {
+                setPreviewImage(URL.createObjectURL(file))
+              } else {
+                setPreviewImage(null)
+              }
+            }
+          })}
+      />
+{errors.image && <p className="text-red-500 text-sm">Image is required</p>}
+
+{/* Image Preview */}
+{previewImage && (
+  <div className="mb-4">
+    <img src={previewImage} alt="Preview" className="rounded-lg" />
+  </div>
+)}
+
+{/* Existing image for post edit */}
+{post && !previewImage && (
+  <div className="w-full mb-4">
+    <img
+      src={service.getFilePreview(post.featuredImage)}
+      alt={post.title}
+      className="rounded-lg"
+    />
+  </div>
+)}
+
           {post && (
               <div className="w-full mb-4">
                   <img

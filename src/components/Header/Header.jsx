@@ -38,7 +38,7 @@ function Header() {
         <nav className='flex'>
           <div className='mr-4'>
             <Link to='/'>
-              <Logo width='70px'   />
+               
 
               </Link>
           </div>
@@ -53,7 +53,7 @@ function Header() {
               </li>
             ) : null
             )}
-            {authStatus && (
+            {authStatus && ( //authStatus true hoga tabi brackets wali chiz display hogi
               <li>
                 <LogoutBtn />
               </li>
