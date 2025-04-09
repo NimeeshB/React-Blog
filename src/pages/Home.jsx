@@ -7,27 +7,17 @@ import { useState, useEffect } from 'react'
 
 function Home() {
   const [posts, setPosts] = useState([])
-  const [loading, setLoading] = useState(true);
   
 
   useEffect(() => {
       service.getPosts([]).then((posts) => {
         console.log(posts)
           if (posts) {
-              setPosts(posts.documents);
+              setPosts(posts.documents)
           }
       })
-      .catch((error) => {
-        console.error('Failed to fetch posts:', error);
-    }).finally(() => {
-        setLoading(false);
-    });
   }, [])
 
-  if (loading) 
-    {
-        return <div className="text-center mt-10">Loading posts...</div>;
-    }
   if (posts.length === 0) {
       return (
           <div className="w-full py-8 mt-4 text-center">
