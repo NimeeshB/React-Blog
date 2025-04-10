@@ -102,7 +102,7 @@ export class Service
 
      getFilePreview(fileId){
         try {
-            return this.bucket.getFilePreview(config.appwriteBucketId, fileId)
+            return this.bucket.getFileView(config.appwriteBucketId, fileId)
         } catch (error) {
             console.log("Appwrite service :: getFilePreview :: error", error);
             return false

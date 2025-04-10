@@ -36,6 +36,7 @@ export default function Post() {
         <div className="py-8">
             <Container>
                 <div className="w-full flex justify-center mb-4 relative border rounded-xl p-2">
+                {console.log("Preview URL:", service.getFilePreview(post.featuredImage))}
                     <img
                         src={service.getFilePreview(post.featuredImage)}
                         alt={post.title}
