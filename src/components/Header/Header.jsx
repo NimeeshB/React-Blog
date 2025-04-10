@@ -53,7 +53,7 @@ function Header() {
               </li>
             ) : null
             )}
-            {authStatus && (
+            {authStatus && ( //authStatus true hoga tabi brackets wali chiz display hogi
               <li>
                 <LogoutBtn />
               </li>
