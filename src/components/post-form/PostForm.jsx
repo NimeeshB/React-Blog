@@ -168,7 +168,7 @@ return (
       />
     </div>
   )}
-          {post && (
+          {/* {post && (
               <div className="w-full mb-4">
                   <img
                       src={service.getFilePreview(post.featuredImage)}
@@ -176,7 +176,7 @@ return (
                       className="rounded-lg"
                   />
               </div>
-          )}
+          )} */}
           <Select
               options={["active", "inactive"]}
               label="Status"

@@ -35,11 +35,11 @@ export class Service
      }
 
      // naya wala title,content, featured imag, status. UserID change nahi hoga, that will be same as jo creator hoga post ka usko hi post ka edit access milega
-     async updatePost(slug, {title, content, featuredImage, status })
+     async updatePost(slug, data /*{title, content, featuredImage, status }*/)
      {
         try 
         {
-            return await this.databases.updateDocument(config.appwriteDatabaseId, config.appwriteCollectionId, slug, {title, content, featuredImage, status})           
+            return await this.databases.updateDocument(config.appwriteDatabaseId, config.appwriteCollectionId, slug, data /*{title, content, featuredImage, status}*/)           
         } 
         catch (error) 
         {

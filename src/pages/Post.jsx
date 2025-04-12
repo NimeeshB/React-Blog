@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import service from '../appwrite/postService'
 import { Button, Container } from "../components";
 import parse from "html-react-parser";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 export default function Post() {
     const [post, setPost] = useState(null);
@@ -22,6 +22,25 @@ export default function Post() {
             });
         } else navigate("/");
     }, [slug, navigate]);
+
+    const handleLike = async () => {
+        if (!userData) {
+            alert("Please log in to like posts.");
+            return;
+        }
+        const updatedLikedBy = post.likedBy?.includes(userData.$id)
+        ? post.likedBy.filter(id => id !== userData.$id) // Unlike
+        : [...(post.likedBy || []), userData.$id]; // Like
+
+        const updatedPost = {
+            ...post,
+            likedBy: updatedLikedBy,
+        };
+    
+        const result = await service.updatePost(post.$id, { likedBy: updatedLikedBy });
+        if (result) setPost(updatedPost);
+    };
+
 
     const deletePost = () => {
         service.deletePost(post.$id).then((status) => {
@@ -42,6 +61,19 @@ export default function Post() {
                         alt={post.title}
                         className="rounded-xl"
                     />
+                    <div className="mt-4">
+    <button
+        onClick={handleLike}
+        className={`px-4 py-2 rounded-lg ${
+            post.likedBy?.includes(userData?.$id)
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-300 text-black'
+        }`}
+    >
+        👍 {post.likedBy?.length || 0}
+    </button>
+</div>
+
 
                     {isAuthor && (
                         <div className="absolute right-6 top-6">
